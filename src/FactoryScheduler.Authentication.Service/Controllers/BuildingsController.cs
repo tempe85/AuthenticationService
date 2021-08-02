@@ -6,8 +6,11 @@ using FactoryScheduler.Authentication.Service.Dtos;
 using FactoryScheduler.Authentication.Service.Entities;
 using FactoryScheduler.Authentication.Service.Interfaces;
 using FactoryScheduler.Authentication.Service.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using static IdentityServer4.IdentityServerConstants;
 
+//TODO: Add user certification table, only allow user (their own) or admin or planner to view user certs
 namespace FactoryScheduler.Authentication.Service.Controllers
 {
     [ApiController]
@@ -62,6 +65,7 @@ namespace FactoryScheduler.Authentication.Service.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = Roles.Admin, Policy = LocalApi.PolicyName)]
         public async Task<ActionResult<BuildingDto>> AddBuilding(CreateBuildingDto createBuildingDto)
         {
             var workBuilding = new WorkBuilding
@@ -77,6 +81,7 @@ namespace FactoryScheduler.Authentication.Service.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = Roles.Admin)]
         public async Task<IActionResult> UpdateBuildingAsync([FromRoute] Guid id, UpdateBuildingDto updateBuildingDto)
         {
             var building = await _workBuildingRepository.GetOneAsync(id);
@@ -88,10 +93,11 @@ namespace FactoryScheduler.Authentication.Service.Controllers
             building.Name = updateBuildingDto.Name;
 
 
-            return NoContent();
+            return Ok();
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = Roles.Admin)]
         public async Task<IActionResult> DeleteBuildingAsync([FromRoute] Guid id)
         {
             var building = await _workBuildingRepository.GetOneAsync(id);

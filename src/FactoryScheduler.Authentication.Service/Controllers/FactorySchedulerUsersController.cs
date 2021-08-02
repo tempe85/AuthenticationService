@@ -14,7 +14,7 @@ namespace FactoryScheduler.Authentication.Service.Controllers
 {
     [ApiController]
     [Route("Users")]
-    [Authorize(Policy = LocalApi.PolicyName)]
+    [Authorize(Roles = Roles.Admin, Policy = LocalApi.PolicyName)]
     public class FactorySchedulerUsersController : ControllerBase
     {
         private readonly UserManager<FactorySchedulerUser> _userManager;

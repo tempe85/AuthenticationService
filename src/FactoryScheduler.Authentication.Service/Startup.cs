@@ -55,6 +55,7 @@ namespace FactoryScheduler.Authentication.Service
                 options.Events.RaiseSuccessEvents = true;
                 options.Events.RaiseFailureEvents = true;
                 options.Events.RaiseErrorEvents = true;
+                options.Events.RaiseInformationEvents = true;
             })
                     .AddAspNetIdentity<FactorySchedulerUser>()
                     .AddInMemoryClients(identityServerSettings.Clients)
