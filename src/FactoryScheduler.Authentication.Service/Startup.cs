@@ -7,6 +7,7 @@ using FactoryScheduler.Authentication.Service.Interfaces;
 using FactoryScheduler.Authentication.Service.Models;
 using FactoryScheduler.Authentication.Service.MongoDB;
 using FactoryScheduler.Authentication.Service.Repositories;
+using FactoryScheduler.Authentication.Service.Settings;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -54,6 +55,15 @@ namespace FactoryScheduler.Authentication.Service
             });
 
             ConfigureMongoDb(services);
+
+            IdentityServerSettings identityServerSettings = new();
+
+            services.AddIdentityServer()
+                    .AddAspNetIdentity<FactorySchedulerUser>()
+                    .AddInMemoryApiScopes(identityServerSettings.ApiScopes)
+                    .AddInMemoryClients(identityServerSettings.Clients);
+
+            //var identityServerSettings = Configuration.GetSection(nameof(IdentityServerSettings)).Get<IdentityServerSettings>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -75,26 +85,39 @@ namespace FactoryScheduler.Authentication.Service
 
             app.UseHttpsRedirection();
 
+            app.UseStaticFiles();
+
             app.UseRouting();
+
+            app.UseIdentityServer();
 
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapRazorPages();
             });
         }
         private void ConfigureMongoDb(IServiceCollection services)
         {
-            var settings = GetMongoDbSettings();
-            services.AddMongoDB(settings);
-            services.AddMongoDbRepository<WorkBuildingRepository, WorkBuilding>(settings.WorkBuildingCollectionName);
-            services.AddMongoDbRepository<WorkAreaRepository, WorkArea>(settings.WorkAreaCollectionName);
+            var serviceSettings = GetMongoDbSettings();
+            services.AddMongoDB(serviceSettings);
+            services.AddMongoDbRepository<WorkBuildingRepository, WorkBuilding>(serviceSettings.WorkBuildingCollectionName);
+            services.AddMongoDbRepository<WorkAreaRepository, WorkArea>(serviceSettings.WorkAreaCollectionName);
             // services.AddMongoDbRepository<WorkStationUsersRepository, WorkStation_Users>(settings.WorkStationUsersCollectionName);
 
+            services.AddDefaultIdentity<FactorySchedulerUser>()
+            .AddRoles<FactorySchedulerRole>()
+            .AddMongoDbStores<FactorySchedulerUser, FactorySchedulerRole, Guid>
+            (
+                serviceSettings.ConnectionString,
+                serviceSettings.DatabaseName //Update this later to auth specific database
+            );
+
         }
-        private FactorySchedulerDatabaseSettings GetMongoDbSettings() =>
-            Configuration.GetSection(nameof(FactorySchedulerDatabaseSettings)).Get<FactorySchedulerDatabaseSettings>();
+        private FactorySchedulerSettings GetMongoDbSettings() =>
+            Configuration.GetSection(nameof(FactorySchedulerSettings)).Get<FactorySchedulerSettings>();
 
     }
 }
