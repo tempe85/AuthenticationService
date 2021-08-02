@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using FactoryScheduler.Authentication.Service.Entities;
+using FactoryScheduler.Authentication.Service.HostedServices;
 using FactoryScheduler.Authentication.Service.Interfaces;
 using FactoryScheduler.Authentication.Service.Models;
 using FactoryScheduler.Authentication.Service.MongoDB;
@@ -68,6 +69,7 @@ namespace FactoryScheduler.Authentication.Service
             {
                 options.SuppressAsyncSuffixInActionNames = false;
             });
+            services.AddHostedService<IdentityConfigureHostedService>();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "FactoryScheduler.Authentication.Service", Version = "v1" });
@@ -116,13 +118,16 @@ namespace FactoryScheduler.Authentication.Service
             services.AddMongoDbRepository<WorkAreaRepository, WorkArea>(serviceSettings.WorkAreaCollectionName);
             // services.AddMongoDbRepository<WorkStationUsersRepository, WorkStation_Users>(settings.WorkStationUsersCollectionName);
 
-            services.AddDefaultIdentity<FactorySchedulerUser>()
-            .AddRoles<FactorySchedulerRole>()
-            .AddMongoDbStores<FactorySchedulerUser, FactorySchedulerRole, Guid>
-            (
-                serviceSettings.ConnectionString,
-                serviceSettings.DatabaseName //Update this later to auth specific database
-            );
+            //Configuring Identity here
+            services
+                .Configure<IdentitySettings>(Configuration.GetSection(nameof(IdentitySettings)))
+                .AddDefaultIdentity<FactorySchedulerUser>()
+                .AddRoles<FactorySchedulerRole>()
+                .AddMongoDbStores<FactorySchedulerUser, FactorySchedulerRole, Guid>
+                (
+                    serviceSettings.ConnectionString,
+                    serviceSettings.DatabaseName //Update this later to auth specific database
+                );
 
         }
         private FactorySchedulerSettings GetMongoDbSettings() =>
