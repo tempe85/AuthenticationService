@@ -4,13 +4,16 @@ using System.Linq;
 using System.Threading.Tasks;
 using FactoryScheduler.Authentication.Service.Dtos;
 using FactoryScheduler.Authentication.Service.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using static IdentityServer4.IdentityServerConstants;
 
 namespace FactoryScheduler.Authentication.Service.Controllers
 {
     [ApiController]
     [Route("Users")]
+    [Authorize(Policy = LocalApi.PolicyName)]
     public class FactorySchedulerUsersController : ControllerBase
     {
         private readonly UserManager<FactorySchedulerUser> _userManager;

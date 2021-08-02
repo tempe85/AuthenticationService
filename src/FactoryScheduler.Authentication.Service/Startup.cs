@@ -45,6 +45,25 @@ namespace FactoryScheduler.Authentication.Service
         public void ConfigureServices(IServiceCollection services)
         {
 
+            ConfigureMongoDb(services);
+
+            var identityServerSettings = Configuration.GetSection(nameof(IdentityServerSettings)).Get<IdentityServerSettings>();
+            services.AddIdentityServer(options =>
+            {
+                //Helps you see console logs for identity server
+                options.Events.RaiseSuccessEvents = true;
+                options.Events.RaiseFailureEvents = true;
+                options.Events.RaiseErrorEvents = true;
+            })
+                    .AddAspNetIdentity<FactorySchedulerUser>()
+                    .AddInMemoryClients(identityServerSettings.Clients)
+                    .AddInMemoryApiScopes(identityServerSettings.ApiScopes)
+                    .AddInMemoryApiResources(identityServerSettings.ApiResources)
+                    .AddInMemoryIdentityResources(identityServerSettings.IdentityResources)
+                    .AddDeveloperSigningCredential();
+
+            services.AddLocalApiAuthentication();
+
             services.AddControllers(options =>
             {
                 options.SuppressAsyncSuffixInActionNames = false;
@@ -54,16 +73,6 @@ namespace FactoryScheduler.Authentication.Service
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "FactoryScheduler.Authentication.Service", Version = "v1" });
             });
 
-            ConfigureMongoDb(services);
-
-            IdentityServerSettings identityServerSettings = new();
-
-            services.AddIdentityServer()
-                    .AddAspNetIdentity<FactorySchedulerUser>()
-                    .AddInMemoryApiScopes(identityServerSettings.ApiScopes)
-                    .AddInMemoryClients(identityServerSettings.Clients);
-
-            //var identityServerSettings = Configuration.GetSection(nameof(IdentityServerSettings)).Get<IdentityServerSettings>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
