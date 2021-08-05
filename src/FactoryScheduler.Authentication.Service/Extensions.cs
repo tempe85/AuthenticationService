@@ -1,12 +1,15 @@
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using FactoryScheduler.Authentication.Service.Dtos;
 using FactoryScheduler.Authentication.Service.Entities;
+using FactoryScheduler.Authentication.Service.Interfaces;
 
 namespace FactoryScheduler.Authentication.Service
 {
     public static class Extensions
     {
-        public static BuildingDto AsDto(this WorkBuilding workBuilding) =>
-                new BuildingDto(Id: workBuilding.Id,
+        public static WorkBuildingDto AsDto(this WorkBuilding workBuilding) =>
+                new WorkBuildingDto(Id: workBuilding.Id,
                                 Name: workBuilding.Name,
                                 Description: workBuilding.Description,
                                 CreatedDate: workBuilding.CreatedDate);
@@ -26,6 +29,18 @@ namespace FactoryScheduler.Authentication.Service
                                             Username: factorySchedulerUser.UserName,
                                             Email: factorySchedulerUser.Email,
                                             CreatedDate: factorySchedulerUser.CreatedOn);
+
+        public static WorkStationDto AsDto(this WorkStation workStation, string workAreaName, string workAreaDescription) =>
+                new WorkStationDto(Id: workStation.Id, Name: workStation.Name, Description: workStation.Description,
+                                    WorkStationType: workStation.WorkStationType, WorkAreaName: workAreaName, WorkAreaPosition: workStation.WorkAreaPosition,
+                                    workStation.WorkerCapacity, WorkAreaDescription: workAreaDescription, CreatedDate: workStation.CreatedDate);
+
+        public async static Task<IReadOnlyCollection<WorkStation>> GetWorkAreaWorkStationsAsync(this WorkArea workArea, IMongoBaseRepository<WorkStation> workStationRepository)
+        {
+            var workStations = await workStationRepository.GetAllAsync(p => p.Id == workArea.Id);
+            return workStations;
+
+        }
 
     }
 }

@@ -6,6 +6,9 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace FactoryScheduler.Authentication.Service.Entities
 {
+    /// <summary>
+    /// Users currently assigned to a work station
+    /// </summary>
     public class WorkStation_Users : IMongoEntity
     {
         public Guid Id { get; init; }

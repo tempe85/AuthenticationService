@@ -9,5 +9,7 @@ namespace FactoryScheduler.Authentication.Service.Entities
     [CollectionName("FactorySchedulerUsers")]
     public class FactorySchedulerUser : MongoIdentityUser<Guid>
     {
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
     }
 }

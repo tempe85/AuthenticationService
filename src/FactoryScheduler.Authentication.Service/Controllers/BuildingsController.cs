@@ -26,21 +26,15 @@ namespace FactoryScheduler.Authentication.Service.Controllers
 
         }
 
-        private static readonly List<BuildingDto> buildings = new()
-        {
-            new BuildingDto(Guid.NewGuid(), "Building 1", "Place where we build things", DateTimeOffset.UtcNow),
-            new BuildingDto(Guid.NewGuid(), "Building 2", "Place where we build things2", DateTimeOffset.UtcNow)
-        };
-
         [HttpGet]
-        public async Task<IEnumerable<BuildingDto>> GetBuildingsAsync()
+        public async Task<IEnumerable<WorkBuildingDto>> GetBuildingsAsync()
         {
             var workBuildings = await _workBuildingRepository.GetAllAsync();
             return workBuildings.Select(p => p.AsDto());
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<BuildingDto>> GetBuildingByIdAsync([FromRoute] Guid id)
+        public async Task<ActionResult<WorkBuildingDto>> GetBuildingByIdAsync([FromRoute] Guid id)
         {
             var building = await _workBuildingRepository.GetOneAsync(id);
             if (building == null)
@@ -64,9 +58,44 @@ namespace FactoryScheduler.Authentication.Service.Controllers
             return Ok(buildingDtos);
         }
 
+
+        [HttpGet("workerStations/{id}")]
+        public ActionResult<IEnumerable<Workers>> GetWorkersByWorkStation([FromRoute] Guid id)
+        {
+            var workStation = workStations.FirstOrDefault(p => p.Id == id);
+            var sationWorkers = workStationWorkers.Where(p => p.WorkStationId == workStation.Id);
+            return Ok(sationWorkers.Select(p => p.Workers));
+        }
+
+        [HttpGet("workers")]
+        public ActionResult<IEnumerable<WorkStation>> GetWorkers()
+        {
+            return Ok(workers);
+        }
+
+        [HttpGet("workStationWorkers")]
+        public ActionResult<IEnumerable<WorkStationWorkers>> GetWorkStationWorkers()
+        {
+            return Ok(workStationWorkers);
+        }
+
+        [HttpPut("stationWorkers/{id}")]
+        public ActionResult UpdateStationWorkers([FromRoute] Guid id, int[] peopleWorking)
+        {
+            var workStation = workStations.FirstOrDefault(p => p.Id == id);
+            var sationWorkers = workStationWorkers.FirstOrDefault(p => p.WorkStationId == workStation.Id);
+            var foundWorkers = workers.Where(p => peopleWorking.Contains(p.Id));
+            if (foundWorkers == null)
+            {
+                return Ok();
+            }
+            sationWorkers.Workers = foundWorkers.ToArray();
+            return Ok();
+        }
+
         [HttpPost]
         [Authorize(Roles = Roles.Admin, Policy = LocalApi.PolicyName)]
-        public async Task<ActionResult<BuildingDto>> AddBuilding(CreateBuildingDto createBuildingDto)
+        public async Task<ActionResult<WorkBuildingDto>> AddBuilding(CreateWorkBuildingDto createBuildingDto)
         {
             var workBuilding = new WorkBuilding
             {
@@ -82,7 +111,7 @@ namespace FactoryScheduler.Authentication.Service.Controllers
 
         [HttpPut("{id}")]
         [Authorize(Roles = Roles.Admin)]
-        public async Task<IActionResult> UpdateBuildingAsync([FromRoute] Guid id, UpdateBuildingDto updateBuildingDto)
+        public async Task<IActionResult> UpdateBuildingAsync([FromRoute] Guid id, UpdateWorkBuildingDto updateBuildingDto)
         {
             var building = await _workBuildingRepository.GetOneAsync(id);
             if (building == null)

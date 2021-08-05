@@ -11,5 +11,6 @@ namespace FactoryScheduler.Authentication.Service.Models
         public string UserCertificationCollectionName { get; init; }
         public string WorkStationUsersCollectionName { get; init; }
         public string WorkAreaCollectionName { get; init; }
+        public string WorkStationCollectionName { get; init; }
     }
 }

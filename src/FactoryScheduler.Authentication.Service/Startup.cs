@@ -117,6 +117,7 @@ namespace FactoryScheduler.Authentication.Service
             services.AddMongoDB(serviceSettings);
             services.AddMongoDbRepository<WorkBuildingRepository, WorkBuilding>(serviceSettings.WorkBuildingCollectionName);
             services.AddMongoDbRepository<WorkAreaRepository, WorkArea>(serviceSettings.WorkAreaCollectionName);
+            services.AddMongoDbRepository<WorkStationRepository, WorkStation>(serviceSettings.WorkStationCollectionName);
             // services.AddMongoDbRepository<WorkStationUsersRepository, WorkStation_Users>(settings.WorkStationUsersCollectionName);
 
             //Configuring Identity here

@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using FactoryScheduler.Authentication.Service.Dtos;
 using FactoryScheduler.Authentication.Service.Entities;
 using FactoryScheduler.Authentication.Service.Interfaces;
-using FactoryScheduler.Authentication.Service.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FactoryScheduler.Authentication.Service.Controllers
@@ -16,11 +15,15 @@ namespace FactoryScheduler.Authentication.Service.Controllers
     {
         private readonly IMongoBaseRepository<WorkArea> _workAreaRepository;
         private readonly IMongoBaseRepository<WorkBuilding> _workBuildingRepository;
+        private readonly IMongoBaseRepository<WorkStation> _workStationRepository;
+
         public WorkAreaController(IMongoBaseRepository<WorkArea> workAreaRepository,
-                                  IMongoBaseRepository<WorkBuilding> workBuildingRepository)
+                                  IMongoBaseRepository<WorkBuilding> workBuildingRepository,
+                                  IMongoBaseRepository<WorkStation> workStationRepository)
         {
             _workAreaRepository = workAreaRepository;
             _workBuildingRepository = workBuildingRepository;
+            _workStationRepository = workStationRepository;
         }
 
         [HttpGet]
@@ -36,8 +39,6 @@ namespace FactoryScheduler.Authentication.Service.Controllers
             });
             return Ok(workAreaDtos);
         }
-
-        
 
         [HttpGet("{id}")]
         public async Task<ActionResult<WorkAreaDto>> GetWorkAreaByIdAsync(Guid id)
@@ -97,6 +98,21 @@ namespace FactoryScheduler.Authentication.Service.Controllers
             await _workAreaRepository.RemoveAsync(id);
 
             return NoContent();
+        }
+
+        [HttpGet("stations/{id}")]
+        public async Task<ActionResult<IEnumerable<WorkStation>>> GetWorkAreaWorkStationsByIdAsync([FromRoute] Guid id)
+        {
+            var workArea = await _workAreaRepository.GetOneAsync(id);
+            if (workArea == null)
+            {
+                return NotFound();
+            }
+
+            var workStations = await _workStationRepository.GetAllAsync(workStation => workStation.WorkAreaId == workArea.Id);
+            var stationDtos = workStations?.Select(workStation => workStation.AsDto(workArea.Name, workArea.Description));
+
+            return Ok(stationDtos);
         }
     }
 }

@@ -5,6 +5,6 @@ namespace FactoryScheduler.Authentication.Service.Enums
         Build = 0,
         Test = 1,
         Box = 2,
-        Ship = 99
+        Ship = 3
     }
 }
