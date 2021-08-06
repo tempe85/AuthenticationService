@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using FactoryScheduler.Authentication.Service.Dtos;
 using FactoryScheduler.Authentication.Service.Entities;
 using FactoryScheduler.Authentication.Service.Interfaces;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FactoryScheduler.Authentication.Service.Controllers
@@ -16,14 +17,17 @@ namespace FactoryScheduler.Authentication.Service.Controllers
         private readonly IMongoBaseRepository<WorkArea> _workAreaRepository;
         private readonly IMongoBaseRepository<WorkBuilding> _workBuildingRepository;
         private readonly IMongoBaseRepository<WorkStation> _workStationRepository;
+        private readonly UserManager<FactorySchedulerUser> _userManager;
 
         public WorkAreaController(IMongoBaseRepository<WorkArea> workAreaRepository,
                                   IMongoBaseRepository<WorkBuilding> workBuildingRepository,
-                                  IMongoBaseRepository<WorkStation> workStationRepository)
+                                  IMongoBaseRepository<WorkStation> workStationRepository,
+                                  UserManager<FactorySchedulerUser> userManager)
         {
             _workAreaRepository = workAreaRepository;
             _workBuildingRepository = workBuildingRepository;
             _workStationRepository = workStationRepository;
+            _userManager = userManager;
         }
 
         [HttpGet]
@@ -110,7 +114,11 @@ namespace FactoryScheduler.Authentication.Service.Controllers
             }
 
             var workStations = await _workStationRepository.GetAllAsync(workStation => workStation.WorkAreaId == workArea.Id);
-            var stationDtos = workStations?.Select(workStation => workStation.AsDto(workArea.Name, workArea.Description));
+            var stationDtos = workStations?.Select(workStation =>
+            {
+                var workStationUsers = _userManager.Users.Where(p => p.AssignedWorkStationId == workStation.Id).AsWorkStationUsers();
+                return workStation.AsDto(workArea.Name, workArea.Description, workStationUsers);
+            });
 
             return Ok(stationDtos);
         }

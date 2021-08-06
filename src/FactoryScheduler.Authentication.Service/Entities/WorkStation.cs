@@ -10,6 +10,7 @@ namespace FactoryScheduler.Authentication.Service.Entities
     {
         public Guid Id { get; init; }
         public Guid WorkAreaId { get; init; }
+        public Guid[] AssignedWorkers { get; set; }
         public WorkStationType WorkStationType { get; init; }
         public string Name { get; set; }
         public bool isDeleted { get; set; } = false;

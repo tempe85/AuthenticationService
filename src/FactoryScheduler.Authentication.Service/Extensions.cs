@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using FactoryScheduler.Authentication.Service.Dtos;
 using FactoryScheduler.Authentication.Service.Entities;
@@ -30,10 +31,12 @@ namespace FactoryScheduler.Authentication.Service
                                             Email: factorySchedulerUser.Email,
                                             CreatedDate: factorySchedulerUser.CreatedOn);
 
-        public static WorkStationDto AsDto(this WorkStation workStation, string workAreaName, string workAreaDescription) =>
+        public static WorkStationDto AsDto(this WorkStation workStation, string workAreaName, string workAreaDescription, WorkStationUser[] workStationUsers) =>
                 new WorkStationDto(Id: workStation.Id, Name: workStation.Name, Description: workStation.Description,
-                                    WorkStationType: workStation.WorkStationType, WorkAreaName: workAreaName, WorkAreaPosition: workStation.WorkAreaPosition,
-                                    workStation.WorkerCapacity, WorkAreaDescription: workAreaDescription, CreatedDate: workStation.CreatedDate);
+                                    WorkStationType: workStation.WorkStationType, WorkAreaName: workAreaName,
+                                    WorkAreaPosition: workStation.WorkAreaPosition, WorkerCapacity: workStation.WorkerCapacity,
+                                    WorkAreaDescription: workAreaDescription, CreatedDate: workStation.CreatedDate,
+                                    WorkStationUsers: workStationUsers);
 
         public async static Task<IReadOnlyCollection<WorkStation>> GetWorkAreaWorkStationsAsync(this WorkArea workArea, IMongoBaseRepository<WorkStation> workStationRepository)
         {
@@ -41,6 +44,9 @@ namespace FactoryScheduler.Authentication.Service
             return workStations;
 
         }
+
+        public static WorkStationUser[] AsWorkStationUsers(this IEnumerable<FactorySchedulerUser> factorySchedulerUsers) =>
+            factorySchedulerUsers.Select(p => new WorkStationUser(p.Id, p.FirstName, p.LastName)).ToArray();
 
     }
 }

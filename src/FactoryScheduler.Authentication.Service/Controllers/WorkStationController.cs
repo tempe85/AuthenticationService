@@ -36,7 +36,11 @@ namespace FactoryScheduler.Authentication.Service.Controllers
 
             var workStationsWorkAreaModel = workAreas.Select(workArea =>
             {
-                var workAreaWorkStationDtos = workStations.Where(p => p.WorkAreaId == workArea.Id)?.Select(p => p.AsDto(workArea.Name, workArea.Description)).ToArray();
+                var workAreaWorkStationDtos = workStations.Where(p => p.WorkAreaId == workArea.Id)?.Select(workStation =>
+                {
+                    var workStationUsers = _userManager.Users.Where(p => p.AssignedWorkStationId == workStation.Id).AsWorkStationUsers();
+                    return workStation.AsDto(workArea.Name, workArea.Description, workStationUsers);
+                }).ToArray();
                 return new WorkStationsByWorkAreaModel
                 {
                     WorkAreaId = workArea.Id,
@@ -58,7 +62,10 @@ namespace FactoryScheduler.Authentication.Service.Controllers
             if (workArea == null)
                 return NotFound();
 
-            return workStation.AsDto(workArea.Name, workArea.Description);
+            var workStationUsers = _userManager.Users.Where(p => p.AssignedWorkStationId == id).AsWorkStationUsers();
+
+
+            return workStation.AsDto(workArea.Name, workArea.Description, workStationUsers);
         }
 
         [HttpPost]
@@ -97,6 +104,7 @@ namespace FactoryScheduler.Authentication.Service.Controllers
             workStation.Description = updateWorkStationDto.Description;
             workStation.Name = updateWorkStationDto.Name;
             workStation.isDeleted = updateWorkStationDto.isDeleted;
+            //workStation.AssignedWorkers = updateWorkStationDto.WorkStationUsers.Select(p => p.Id).ToArray();
 
             await _workStationRepository.UpdateAsync(workStation);
 
@@ -114,21 +122,6 @@ namespace FactoryScheduler.Authentication.Service.Controllers
             await _workStationRepository.RemoveAsync(id);
 
             return NoContent();
-        }
-
-        [HttpGet("stations/{id}")]
-        public async Task<ActionResult<IEnumerable<WorkStation>>> GetWorkersByWorkStationAsync([FromRoute] Guid id)
-        {
-            var workStation = await _workStationRepository.GetOneAsync(id);
-            if (workArea == null)
-            {
-                return NotFound();
-            }
-
-            var workStations = await _workStationRepository.GetAllAsync(workStation => workStation.WorkAreaId == workArea.Id);
-            var stationDtos = workStations?.Select(workStation => workStation.AsDto(workArea.Name, workArea.Description));
-
-            return Ok(stationDtos);
         }
     }
 }

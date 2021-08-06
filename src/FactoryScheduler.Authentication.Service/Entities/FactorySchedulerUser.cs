@@ -11,5 +11,6 @@ namespace FactoryScheduler.Authentication.Service.Entities
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }
+        public Guid AssignedWorkStationId { get; set; }
     }
 }

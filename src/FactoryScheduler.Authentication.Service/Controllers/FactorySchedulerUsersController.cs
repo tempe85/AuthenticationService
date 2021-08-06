@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using FactoryScheduler.Authentication.Service.Dtos;
 using FactoryScheduler.Authentication.Service.Entities;
 using FactoryScheduler.Authentication.Service.Enums;
+using FactoryScheduler.Authentication.Service.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -18,10 +19,12 @@ namespace FactoryScheduler.Authentication.Service.Controllers
     public class FactorySchedulerUsersController : ControllerBase
     {
         private readonly UserManager<FactorySchedulerUser> _userManager;
+        private readonly IMongoBaseRepository<WorkStation> _workStationRepository;
 
-        public FactorySchedulerUsersController(UserManager<FactorySchedulerUser> userManager)
+        public FactorySchedulerUsersController(UserManager<FactorySchedulerUser> userManager, IMongoBaseRepository<WorkStation> workStationRepository)
         {
             _userManager = userManager;
+            _workStationRepository = workStationRepository;
         }
 
         [HttpGet]
@@ -116,6 +119,27 @@ namespace FactoryScheduler.Authentication.Service.Controllers
             }
 
             await _userManager.DeleteAsync(user);
+
+            return NoContent();
+        }
+
+        [HttpPut("moveUserStation/{id}")]
+        public async Task<IActionResult> MoveUserAssignedWorkStation(MoveUserWorkStationRequest moveUserWorkStationRequest)
+        {
+            var user = await _userManager.FindByIdAsync(moveUserWorkStationRequest.UserId.ToString());
+            if (user == null)
+            {
+                return NotFound();
+            }
+            var workStation = await _workStationRepository.GetOneAsync(moveUserWorkStationRequest.NewWorkStationId);
+            if (workStation == null)
+            {
+                //Should really be a exception
+                return NotFound();
+            }
+            user.AssignedWorkStationId = moveUserWorkStationRequest.NewWorkStationId;
+
+            await _userManager.UpdateAsync(user);
 
             return NoContent();
         }

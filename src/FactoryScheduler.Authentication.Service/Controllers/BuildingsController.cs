@@ -58,41 +58,6 @@ namespace FactoryScheduler.Authentication.Service.Controllers
             return Ok(buildingDtos);
         }
 
-
-        [HttpGet("workerStations/{id}")]
-        public ActionResult<IEnumerable<Workers>> GetWorkersByWorkStation([FromRoute] Guid id)
-        {
-            var workStation = workStations.FirstOrDefault(p => p.Id == id);
-            var sationWorkers = workStationWorkers.Where(p => p.WorkStationId == workStation.Id);
-            return Ok(sationWorkers.Select(p => p.Workers));
-        }
-
-        [HttpGet("workers")]
-        public ActionResult<IEnumerable<WorkStation>> GetWorkers()
-        {
-            return Ok(workers);
-        }
-
-        [HttpGet("workStationWorkers")]
-        public ActionResult<IEnumerable<WorkStationWorkers>> GetWorkStationWorkers()
-        {
-            return Ok(workStationWorkers);
-        }
-
-        [HttpPut("stationWorkers/{id}")]
-        public ActionResult UpdateStationWorkers([FromRoute] Guid id, int[] peopleWorking)
-        {
-            var workStation = workStations.FirstOrDefault(p => p.Id == id);
-            var sationWorkers = workStationWorkers.FirstOrDefault(p => p.WorkStationId == workStation.Id);
-            var foundWorkers = workers.Where(p => peopleWorking.Contains(p.Id));
-            if (foundWorkers == null)
-            {
-                return Ok();
-            }
-            sationWorkers.Workers = foundWorkers.ToArray();
-            return Ok();
-        }
-
         [HttpPost]
         [Authorize(Roles = Roles.Admin, Policy = LocalApi.PolicyName)]
         public async Task<ActionResult<WorkBuildingDto>> AddBuilding(CreateWorkBuildingDto createBuildingDto)
