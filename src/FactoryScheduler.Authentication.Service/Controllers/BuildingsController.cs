@@ -54,8 +54,8 @@ namespace FactoryScheduler.Authentication.Service.Controllers
                 return NotFound();
             }
             var buildingWorkAreas = await _workAreaRepository.GetAllAsync(workArea => workArea.WorkBuildingId == building.Id);
-            var buildingDtos = buildingWorkAreas?.Select(workArea => workArea.AsDto(building.Name, building.Description));
-            return Ok(buildingDtos);
+            var workAreaDtos = buildingWorkAreas?.Select(workArea => workArea.AsDto(building.Name, building.Description));
+            return Ok(workAreaDtos);
         }
 
         [HttpPost]

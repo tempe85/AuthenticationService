@@ -29,6 +29,9 @@ namespace FactoryScheduler.Authentication.Service
                 new FactorySchedulerUserDto(Id: factorySchedulerUser.Id,
                                             Username: factorySchedulerUser.UserName,
                                             Email: factorySchedulerUser.Email,
+                                            AssignedWorkStationId: factorySchedulerUser.AssignedWorkStationId,
+                                            FirstName: factorySchedulerUser.FirstName,
+                                            LastName: factorySchedulerUser.LastName,
                                             CreatedDate: factorySchedulerUser.CreatedOn);
 
         public static WorkStationDto AsDto(this WorkStation workStation, string workAreaName, string workAreaDescription, WorkStationUser[] workStationUsers) =>

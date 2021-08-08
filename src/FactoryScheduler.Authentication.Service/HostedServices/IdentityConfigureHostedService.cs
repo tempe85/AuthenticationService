@@ -37,7 +37,10 @@ namespace FactoryScheduler.Authentication.Service.HostedServices
                 adminUser = new FactorySchedulerUser
                 {
                     UserName = _identitySettings.AdminEmail,
-                    Email = _identitySettings.AdminEmail
+                    Email = _identitySettings.AdminEmail,
+                    FirstName = "Admin",
+                    LastName = "Admin",
+                    AssignedWorkStationId = null
                 };
                 await userManager.CreateAsync(adminUser, _identitySettings.AdminPassword);
                 await userManager.AddToRoleAsync(adminUser, Roles.Admin);

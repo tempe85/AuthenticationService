@@ -28,7 +28,7 @@ namespace FactoryScheduler.Authentication.Service.Controllers
             _userManager = userManager;
         }
 
-        [HttpGet]
+        [HttpPost("workStationsByWorkAreas")]
         public async Task<ActionResult<IEnumerable<WorkStationsByWorkAreaModel>>> GetWorkStationsByWorkAreasAsync([FromBody] Guid[] workAreaIds)
         {
             var workStations = await _workStationRepository.GetAllAsync();
@@ -51,7 +51,7 @@ namespace FactoryScheduler.Authentication.Service.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<WorkStationDto>> GetWorkStationByIdAsync(Guid id)
+        public async Task<ActionResult<WorkStationDto>> GetWorkStationByIdAsync([FromRoute] Guid id)
         {
             var workStation = await _workStationRepository.GetOneAsync(id);
             if (workStation == null)
@@ -69,7 +69,7 @@ namespace FactoryScheduler.Authentication.Service.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<WorkAreaDto>> AddWorkStationAsync(CreateWorkStationDto createWorkStationDto)
+        public async Task<ActionResult<WorkAreaDto>> AddWorkStationAsync([FromBody] CreateWorkStationDto createWorkStationDto)
         {
             //First make sure workArea exists
             var workArea = await _workAreaRepository.GetOneAsync(createWorkStationDto.WorkAreaId);
@@ -94,7 +94,7 @@ namespace FactoryScheduler.Authentication.Service.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateWorkStationAsync(Guid id, UpdateWorkStationDto updateWorkStationDto)
+        public async Task<IActionResult> UpdateWorkStationAsync([FromRoute] Guid id, [FromBody] UpdateWorkStationDto updateWorkStationDto)
         {
             var workStation = await _workStationRepository.GetOneAsync(id);
             if (workStation == null)
@@ -112,7 +112,7 @@ namespace FactoryScheduler.Authentication.Service.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteWorkStationAsync(Guid id)
+        public async Task<IActionResult> DeleteWorkStationAsync([FromRoute] Guid id)
         {
             var item = await _workStationRepository.GetOneAsync(id);
             if (item == null)

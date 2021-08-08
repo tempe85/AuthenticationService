@@ -45,7 +45,7 @@ namespace FactoryScheduler.Authentication.Service.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<WorkAreaDto>> GetWorkAreaByIdAsync(Guid id)
+        public async Task<ActionResult<WorkAreaDto>> GetWorkAreaByIdAsync([FromRoute] Guid id)
         {
             var item = await _workAreaRepository.GetOneAsync(id);
             if (item == null)
@@ -60,7 +60,7 @@ namespace FactoryScheduler.Authentication.Service.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<WorkAreaDto>> AddWorkAreaAsync(CreateWorkAreaDto updateItemDto)
+        public async Task<ActionResult<WorkAreaDto>> AddWorkAreaAsync([FromBody] CreateWorkAreaDto updateItemDto)
         {
             var item = new WorkArea
             {
@@ -76,7 +76,7 @@ namespace FactoryScheduler.Authentication.Service.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateWorkAreaAsync(Guid id, UpdateWorkAreaDto updateItemDto)
+        public async Task<IActionResult> UpdateWorkAreaAsync([FromRoute] Guid id, [FromBody] UpdateWorkAreaDto updateItemDto)
         {
             var item = await _workAreaRepository.GetOneAsync(id);
             if (item == null)
@@ -92,7 +92,7 @@ namespace FactoryScheduler.Authentication.Service.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteWorkAreaAsync(Guid id)
+        public async Task<IActionResult> DeleteWorkAreaAsync([FromRoute] Guid id)
         {
             var item = await _workAreaRepository.GetOneAsync(id);
             if (item == null)
@@ -105,7 +105,7 @@ namespace FactoryScheduler.Authentication.Service.Controllers
         }
 
         [HttpGet("stations/{id}")]
-        public async Task<ActionResult<IEnumerable<WorkStation>>> GetWorkAreaWorkStationsByIdAsync([FromRoute] Guid id)
+        public async Task<ActionResult<IEnumerable<WorkStationDto>>> GetWorkAreaWorkStationsByIdAsync([FromRoute] Guid id)
         {
             var workArea = await _workAreaRepository.GetOneAsync(id);
             if (workArea == null)
