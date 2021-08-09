@@ -1,0 +1,5 @@
+{
+    "appService.preDeployTask": "publish-release",
+    "appService.deploySubpath": "bin\\Release\\net5.0\\publish",
+    "appService.defaultWebAppToDeploy": "/subscriptions/5fd9edb2-1528-426a-9fba-0d74f16ef332/resourceGroups/MyFactorySchedulerResourceGroup/providers/Microsoft.Web/sites/FactorySchedulerApp-2"
+}
