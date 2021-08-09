@@ -45,7 +45,11 @@ namespace FactoryScheduler.Authentication.Service
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
+            services.AddLogging(config =>
+            {
+                config.AddDebug();
+                config.AddConsole();
+            });
             ConfigureMongoDb(services);
 
             var identityServerSettings = Configuration.GetSection(nameof(IdentityServerSettings)).Get<IdentityServerSettings>();
@@ -62,8 +66,8 @@ namespace FactoryScheduler.Authentication.Service
                     .AddInMemoryApiScopes(identityServerSettings.ApiScopes)
                     .AddInMemoryApiResources(identityServerSettings.ApiResources)
                     .AddInMemoryIdentityResources(identityServerSettings.IdentityResources)
+                    .AddProfileService<ProfileService>()
                     .AddDeveloperSigningCredential();
-
             services.AddLocalApiAuthentication();
 
             services.AddControllers(options =>
