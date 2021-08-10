@@ -7,5 +7,7 @@ namespace FactoryScheduler.Authentication.Service.Processors
     public interface IWorkStationProcessor
     {
         Task<WorkStation> GetNewWorkStationFromWorkStationDtoAsync(CreateWorkStationDto createWorkStationDto);
+
+        Task UpdateWorkstationFromUpdateWorkStationDtoAsync(UpdateWorkStationDto updateWorkStationDto, WorkStation workStation);
     }
 }

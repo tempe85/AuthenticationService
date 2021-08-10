@@ -40,5 +40,14 @@ namespace FactoryScheduler.Authentication.Service.Processors
                 WorkStationType = createWorkStationDto.WorkStationType,
             };
         }
+
+        public async Task UpdateWorkstationFromUpdateWorkStationDtoAsync(UpdateWorkStationDto updateWorkStationDto, WorkStation workStation)
+        {
+            workStation.Description = updateWorkStationDto.Description;
+            workStation.Name = updateWorkStationDto.Name;
+            workStation.isDeleted = updateWorkStationDto.isDeleted;
+
+            await _workStationRepository.UpdateAsync(workStation);
+        }
     }
 }

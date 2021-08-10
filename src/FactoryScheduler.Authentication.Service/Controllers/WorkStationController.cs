@@ -89,12 +89,7 @@ namespace FactoryScheduler.Authentication.Service.Controllers
             {
                 return NotFound();
             }
-            workStation.Description = updateWorkStationDto.Description;
-            workStation.Name = updateWorkStationDto.Name;
-            workStation.isDeleted = updateWorkStationDto.isDeleted;
-            //workStation.AssignedWorkers = updateWorkStationDto.WorkStationUsers.Select(p => p.Id).ToArray();
-
-            await _workStationRepository.UpdateAsync(workStation);
+            await _workStationProcessor.UpdateWorkstationFromUpdateWorkStationDtoAsync(updateWorkStationDto, workStation);
 
             return NoContent();
         }
