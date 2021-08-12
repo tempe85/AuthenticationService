@@ -6,6 +6,7 @@ using FactoryScheduler.Authentication.Service.Dtos;
 using FactoryScheduler.Authentication.Service.Entities;
 using FactoryScheduler.Authentication.Service.Interfaces;
 using FactoryScheduler.Authentication.Service.Models;
+using FactoryScheduler.Authentication.Service.Processors;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,15 +19,19 @@ namespace FactoryScheduler.Authentication.Service.Controllers
     private readonly IMongoBaseRepository<WorkArea> _workAreaRepository;
     private readonly IMongoBaseRepository<WorkStation> _workStationRepository;
     private readonly UserManager<FactorySchedulerUser> _userManager;
+    private readonly IWorkStationProcessor _workStationProcessor;
 
     public WorkStationController(IMongoBaseRepository<WorkArea> workAreaRepository,
                                 IMongoBaseRepository<WorkStation> workStationRepository,
-                                UserManager<FactorySchedulerUser> userManager)
+                                UserManager<FactorySchedulerUser> userManager,
+                                IWorkStationProcessor workStationProcessor)
     {
       _workAreaRepository = workAreaRepository;
       _workStationRepository = workStationRepository;
       _userManager = userManager;
+      _workStationProcessor = workStationProcessor;
     }
+
 
     [HttpPost("workStationsByWorkAreas")]
     public async Task<ActionResult<IEnumerable<WorkStationsByWorkAreaModel>>> GetWorkStationsByWorkAreasAsync([FromBody] Guid[] workAreaIds)
@@ -69,7 +74,7 @@ namespace FactoryScheduler.Authentication.Service.Controllers
     }
 
     [HttpGet("WorkArea/{id}")]
-    public async Task<ActionResult<IEnumerable<WorkStationDto>>> GetWorkStationByWorkAreaIdAsync([FromRoute] Guid id)
+    public async Task<ActionResult<IEnumerable<WorkStationDto>>> GetWorkStationsByWorkAreaIdAsync([FromRoute] Guid id)
     {
       var workArea = await _workAreaRepository.GetOneAsync(id);
       if (workArea == null)
@@ -88,23 +93,7 @@ namespace FactoryScheduler.Authentication.Service.Controllers
     [HttpPost]
     public async Task<ActionResult<WorkAreaDto>> AddWorkStationAsync([FromBody] CreateWorkStationDto createWorkStationDto)
     {
-      //First make sure workArea exists
-      var workArea = await _workAreaRepository.GetOneAsync(createWorkStationDto.WorkAreaId);
-      var maxOperationPosition = (await workArea.GetWorkAreaWorkStationsAsync(_workStationRepository))?.Select(p => p.WorkAreaPosition).ToArray().Max() ?? -1;
-      if (workArea == null)
-      {
-        throw new Exception($"Unable to find work area: {createWorkStationDto.WorkAreaId} for created work station");
-      }
-      var workStation = new WorkStation
-      {
-        CreatedDate = DateTimeOffset.UtcNow,
-        Description = createWorkStationDto.Description,
-        Id = Guid.NewGuid(),
-        Name = createWorkStationDto.Name,
-        WorkAreaPosition = maxOperationPosition + 1,
-        WorkerCapacity = createWorkStationDto.WorkerCapacity,
-        WorkStationType = createWorkStationDto.WorkStationType,
-      };
+      var workStation = await _workStationProcessor.GetNewWorkStationFromWorkStationDtoAsync(createWorkStationDto);
       await _workStationRepository.CreateAsync(workStation);
 
       return CreatedAtAction(nameof(GetWorkStationByIdAsync), new { id = workStation.Id }, workStation);
@@ -118,12 +107,7 @@ namespace FactoryScheduler.Authentication.Service.Controllers
       {
         return NotFound();
       }
-      workStation.Description = updateWorkStationDto.Description;
-      workStation.Name = updateWorkStationDto.Name;
-      workStation.isDeleted = updateWorkStationDto.isDeleted;
-      //workStation.AssignedWorkers = updateWorkStationDto.WorkStationUsers.Select(p => p.Id).ToArray();
-
-      await _workStationRepository.UpdateAsync(workStation);
+      await _workStationProcessor.UpdateWorkstationFromUpdateWorkStationDtoAsync(updateWorkStationDto, workStation);
 
       return NoContent();
     }

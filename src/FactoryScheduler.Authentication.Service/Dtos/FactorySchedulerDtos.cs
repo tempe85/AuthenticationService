@@ -19,8 +19,16 @@ namespace FactoryScheduler.Authentication.Service.Dtos
     public record UpdateWorkAreaDto([Required] string Name, string Description);
 
     //WorkStation Dtos
-    public record WorkStationDto(Guid Id, string Name, string Description, WorkStationType WorkStationType, string WorkAreaName,
-                                 int WorkAreaPosition, WorkStationUser[] WorkStationUsers, int WorkerCapacity, string WorkAreaDescription, DateTimeOffset CreatedDate);
+    public record WorkStationDto(Guid Id,
+                                 string Name,
+                                 string Description,
+                                 WorkStationType WorkStationType,
+                                 string WorkAreaName,
+                                 int WorkAreaPosition,
+                                 WorkStationUser[] WorkStationUsers,
+                                 int WorkerCapacity,
+                                 string WorkAreaDescription,
+                                 DateTimeOffset CreatedDate);
 
     public record CreateWorkStationDto([Required] string Name, [Required] Guid WorkAreaId, [Required] WorkStationType WorkStationType,
                                        [Required] int WorkerCapacity, string Description);

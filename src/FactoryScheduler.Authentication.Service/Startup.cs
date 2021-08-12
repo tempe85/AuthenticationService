@@ -7,6 +7,7 @@ using FactoryScheduler.Authentication.Service.HostedServices;
 using FactoryScheduler.Authentication.Service.Interfaces;
 using FactoryScheduler.Authentication.Service.Models;
 using FactoryScheduler.Authentication.Service.MongoDB;
+using FactoryScheduler.Authentication.Service.Processors;
 using FactoryScheduler.Authentication.Service.Repositories;
 using FactoryScheduler.Authentication.Service.Settings;
 using Microsoft.AspNetCore.Builder;
@@ -42,7 +43,6 @@ namespace FactoryScheduler.Authentication.Service
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddLogging(config =>
@@ -51,6 +51,7 @@ namespace FactoryScheduler.Authentication.Service
                 config.AddConsole();
             });
             ConfigureMongoDb(services);
+            services.AddSingleton<IWorkStationProcessor, WorkStationProcessor>();
 
             var identityServerSettings = Configuration.GetSection(nameof(IdentityServerSettings)).Get<IdentityServerSettings>();
             services.AddIdentityServer(options =>
@@ -123,10 +124,6 @@ namespace FactoryScheduler.Authentication.Service
             services.AddMongoDbRepository<WorkBuildingRepository, WorkBuilding>(serviceSettings.WorkBuildingCollectionName);
             services.AddMongoDbRepository<WorkAreaRepository, WorkArea>(serviceSettings.WorkAreaCollectionName);
             services.AddMongoDbRepository<WorkStationRepository, WorkStation>(serviceSettings.WorkStationCollectionName);
-            //services.AddMongoDbRepository<WorkStationUsersRepository, WorkStation_Users>(serviceSettings.WorkStationUsersCollectionName);
-            // services.AddMongoDbRepository<WorkStationUsersRepository, WorkStation_Users>(settings.WorkStationUsersCollectionName);
-
-            //Configuring Identity here
             services
                 .Configure<IdentitySettings>(Configuration.GetSection(nameof(IdentitySettings)))
                 .AddDefaultIdentity<FactorySchedulerUser>()
