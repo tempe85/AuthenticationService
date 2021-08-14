@@ -33,7 +33,7 @@ namespace FactoryScheduler.Authentication.Service.Controllers
     }
 
 
-    [HttpPost("workStationsByWorkAreas")]
+    [HttpPost("WorkAreas")]
     public async Task<ActionResult<IEnumerable<WorkStationsByWorkAreaModel>>> GetWorkStationsByWorkAreasAsync([FromBody] Guid[] workAreaIds)
     {
       var workStations = await _workStationRepository.GetAllAsync();
@@ -71,6 +71,25 @@ namespace FactoryScheduler.Authentication.Service.Controllers
 
 
       return workStation.AsDto(workArea.Name, workArea.Description, workStationUsers);
+    }
+
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<WorkStationDto>>> GetAllWorkStationsAsync()
+    {
+      var workStations = await _workStationRepository.GetAllAsync();
+      if (workStations == null)
+      {
+        return NotFound();
+      }
+      var workAreaIds = workStations.Select(p => p.WorkAreaId);
+      var workAreas = await _workAreaRepository.GetAllAsync(workArea => workAreaIds.Contains(workArea.Id));
+      var workStationDtos = workStations.Select(workStation =>
+      {
+        var workArea = workAreas.Single(workArea => workArea.Id == workStation.WorkAreaId);
+        var workStationUsers = _userManager.Users.Where(p => p.AssignedWorkStationId == workStation.Id).AsWorkStationUsers();
+        return workStation.AsDto(workArea.Name, workArea.Description, workStationUsers);
+      });
+      return Ok(workStationDtos);
     }
 
     [HttpGet("WorkArea/{id}")]
